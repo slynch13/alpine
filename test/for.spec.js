@@ -2,7 +2,7 @@ import Alpine from 'alpinejs'
 import { wait } from '@testing-library/dom'
 
 global.MutationObserver = class {
-    observe() {}
+    observe() { }
 }
 
 test('x-for', async () => {
@@ -194,6 +194,68 @@ test('can key by index', async () => {
 
     await wait(() => { expect(document.querySelectorAll('span').length).toEqual(3) })
 })
+
+test('can attach to server rendered items', async () => {
+    document.body.innerHTML = `
+        <div x-data="{ items: ['foo', 'bar'] }">
+            <button x-on:click="items = ['bar', 'foo', 'baz']"></button>
+
+            <template x-for="(item, index) in items" :key="index">
+                <span x-text="item"></span>
+            </template>
+            <span x-text="item" r-for-key="bar"></span>
+            <span x-text="item" r-for-key="foo"></span>
+        </div>
+    `
+
+    Alpine.start()
+
+    expect(document.querySelectorAll('span').length).toEqual(2)
+
+    document.querySelector('button').click()
+
+    await wait(() => { expect(document.querySelectorAll('span').length).toEqual(3) })
+})
+
+test('will only attach to marked server rendered items', async () => {
+    document.body.innerHTML = `
+        <div x-data="{ items: ['foo', 'bar'] }">
+            <button x-on:click="items = ['bar', 'foo', 'baz']"></button>
+
+            <template x-for="(item, index) in items" :key="index">
+                <span x-text="item"></span>
+            </template>
+            <span x-text="item" r-for-key="bar">bar</span>
+            <span x-text="item" r-for-key="foo">foo</span>
+            <span>baz</span>
+        </div>
+    `
+
+    Alpine.start()
+
+    expect(document.querySelectorAll('span').length).toEqual(3)
+
+    document.querySelector('button').click()
+
+    await wait(() => { expect(document.querySelectorAll('span').length).toEqual(4) })
+})
+
+test('will remove no longer existing marked server rendered items', async () => {
+    document.body.innerHTML = `
+        <div x-data="{ items: ['foo', 'bar'] }">
+            <template x-for="(item, index) in items" :key="index">
+                <span x-text="item"></span>
+            </template>
+            <span x-text="item" r-for-key="bar">bar</span>
+            <span x-text="item" r-for-key="foo">foo</span>
+        </div>
+    `
+
+    Alpine.start()
+
+    await wait(() => { expect(document.querySelectorAll('span').length).toEqual(2) })
+})
+
 
 test('listeners in loop get fresh iteration data even though they are only registered initially', async () => {
     document.body.innerHTML = `

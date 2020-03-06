@@ -188,17 +188,17 @@ If you wish to run code AFTER Alpine has made its initial updates to the DOM (so
 </div>
 ```
 
-| Directive | Description |
-| --- | --- |
-| `x-show.transition` | A simultanious fade and scale. (opacity, scale: 0.95, timing-function: cubic-bezier(0.4, 0.0, 0.2, 1), duration-in: 150ms, duration-out: 75ms)
-| `x-show.transition.in` | Ony transition in. |
-| `x-show.transition.out` | Ony transition out. |
-| `x-show.transition.opacity` | Only use the fade. |
-| `x-show.transition.scale` | Only use the scale. |
-| `x-show.transition.scale.75` | Customize the CSS scale transform `transform: scale(.75)`. |
-| `x-show.transition.duration.200ms` | Sets the "in" transition to 200ms. The out will be set to half that (100ms). |
-| `x-show.transition.origin.top.right` | Customize the CSS transform origin `transform-origin: top right`. |
-| `x-show.transition.in.duration.200ms.out.duration.50ms` | Different durations for "in" and "out". |
+| Directive                                               | Description                                                                                                                                    |
+| ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `x-show.transition`                                     | A simultanious fade and scale. (opacity, scale: 0.95, timing-function: cubic-bezier(0.4, 0.0, 0.2, 1), duration-in: 150ms, duration-out: 75ms) |
+| `x-show.transition.in`                                  | Ony transition in.                                                                                                                             |
+| `x-show.transition.out`                                 | Ony transition out.                                                                                                                            |
+| `x-show.transition.opacity`                             | Only use the fade.                                                                                                                             |
+| `x-show.transition.scale`                               | Only use the scale.                                                                                                                            |
+| `x-show.transition.scale.75`                            | Customize the CSS scale transform `transform: scale(.75)`.                                                                                     |
+| `x-show.transition.duration.200ms`                      | Sets the "in" transition to 200ms. The out will be set to half that (100ms).                                                                   |
+| `x-show.transition.origin.top.right`                    | Customize the CSS transform origin `transform-origin: top right`.                                                                              |
+| `x-show.transition.in.duration.200ms.out.duration.50ms` | Different durations for "in" and "out".                                                                                                        |
 
 > Note: All of these transition modifiers can be used in conjunction with each other. This is possible (although rediculous lol): `x-show.transition.in.duration.100ms.origin.top.right.opacity.scale.85.out.duration.200ms.origin.bottom.left.opacity.scale.95`
 
@@ -361,10 +361,23 @@ It's important that `x-if` is used on a `<template></template>` tag because Alpi
 </template>
 ```
 
+
 `x-for` is available for cases when you want to create new DOM nodes for each item in an array. This should appear similar to `v-for` in Vue, with one exception of needing to exist on a `template` tag, and not a regular DOM element.
 
 > Note: the `:key` binding is optional, but HIGHLY recommended.
 
+#### `r-for-item`
+`r-for-item` provides a way to mark a DOM element as linked to the `x-for` template preceding it.
+
+> Note: `x-for` will only bind to `r-for-item` marked elements immediately after the template tag and will stop at the first sibling element which does not have the attribute. 
+
+```html
+<template x-for="item in items" :key="item">
+    <div x-text="item"></div>
+</template>
+<div x-text="item" r-for-item="1">1</div>
+<div>This element will not bind</div>
+```
 ---
 
 ### `x-transition`
@@ -398,14 +411,14 @@ Alpine offers 6 different transition directives for applying classes to various 
 
 These behave exactly like VueJs's transition directives, except they have different, more sensible names:
 
-| Directive | Description |
-| --- | --- |
-| `:enter` | Applied during the entire entering phase. |
-| `:enter-start` | Added before element is inserted, removed one frame after element is inserted. |
-| `:enter-end` | Added one frame after element is inserted (at the same time `enter-start` is removed), removed when transition/animation finishes.
-| `:leave` | Applied during the entire leaving phase. |
-| `:leave-start` | Added immediately when a leaving transition is triggered, removed after one frame. |
-| `:leave-end` | Added one frame after a leaving transition is triggered (at the same time `leave-start` is removed), removed when the transition/animation finishes.
+| Directive      | Description                                                                                                                                          |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `:enter`       | Applied during the entire entering phase.                                                                                                            |
+| `:enter-start` | Added before element is inserted, removed one frame after element is inserted.                                                                       |
+| `:enter-end`   | Added one frame after element is inserted (at the same time `enter-start` is removed), removed when transition/animation finishes.                   |
+| `:leave`       | Applied during the entire leaving phase.                                                                                                             |
+| `:leave-start` | Added immediately when a leaving transition is triggered, removed after one frame.                                                                   |
+| `:leave-end`   | Added one frame after a leaving transition is triggered (at the same time `leave-start` is removed), removed when the transition/animation finishes. |
 
 ---
 

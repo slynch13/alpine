@@ -2,9 +2,14 @@ import { transitionIn, transitionOut, getXAttrs } from '../utils'
 
 export function handleForDirective(component, el, expression, initialUpdate) {
     const { single, bunch, iterator1, iterator2 } = parseFor(expression)
+    let serverElement = el.nextElementSibling
+
+    while (serverElement && serverElement.getAttribute("r-for-key")) {
+        serverElement.__x_for_key = serverElement.getAttribute("r-for-key")
+        serverElement = serverElement.nextElementSibling
+    }
 
     var items = component.evaluateReturnExpression(el, bunch)
-
     // As we walk the array, we'll also walk the DOM (updating/creating as we go).
     var previousEl = el
     items.forEach((i, index, group) => {
@@ -17,7 +22,7 @@ export function handleForDirective(component, el, expression, initialUpdate) {
             if (currentEl.__x_for_key !== currentKey) {
                 // We'll look ahead to see if we can find it further down.
                 var tmpCurrentEl = currentEl
-                while(tmpCurrentEl) {
+                while (tmpCurrentEl) {
                     // If we found it later in the DOM.
                     if (tmpCurrentEl.__x_for_key === currentKey) {
                         // Move it to where it's supposed to be in the DOM.
@@ -37,7 +42,7 @@ export function handleForDirective(component, el, expression, initialUpdate) {
             currentEl.__x_for_alias = single
             currentEl.__x_for_value = i
             component.updateElements(currentEl, () => {
-                return {[currentEl.__x_for_alias]: currentEl.__x_for_value}
+                return { [currentEl.__x_for_alias]: currentEl.__x_for_value }
             })
         } else {
             // There are no more .__x_for_key elements, meaning the page is first loading, OR, there are
@@ -52,7 +57,7 @@ export function handleForDirective(component, el, expression, initialUpdate) {
             currentEl = previousEl.nextElementSibling
 
             // And transition it in if it's not the first page load.
-            transitionIn(currentEl, () => {}, initialUpdate)
+            transitionIn(currentEl, () => { }, initialUpdate)
 
             // Now, let's walk the new DOM node and initialize everything,
             // including new nested components.
@@ -61,7 +66,7 @@ export function handleForDirective(component, el, expression, initialUpdate) {
             currentEl.__x_for_alias = single
             currentEl.__x_for_value = i
             component.initializeElements(currentEl, () => {
-                return {[currentEl.__x_for_alias]: currentEl.__x_for_value}
+                return { [currentEl.__x_for_alias]: currentEl.__x_for_value }
             })
         }
 
@@ -73,11 +78,11 @@ export function handleForDirective(component, el, expression, initialUpdate) {
     // Now that we've added/updated/moved all the elements for the current state of the loop.
     // Anything left over, we can get rid of.
     var nextElementFromOldLoop = (previousEl.nextElementSibling && previousEl.nextElementSibling.__x_for_key !== undefined) ? previousEl.nextElementSibling : false
+    console.log(nextElementFromOldLoop)
 
-    while(nextElementFromOldLoop) {
+    while (nextElementFromOldLoop) {
         const nextElementFromOldLoopImmutable = nextElementFromOldLoop
         const nextSibling = nextElementFromOldLoop.nextElementSibling
-
         transitionOut(nextElementFromOldLoop, () => {
             nextElementFromOldLoopImmutable.remove()
         })
@@ -87,13 +92,13 @@ export function handleForDirective(component, el, expression, initialUpdate) {
 }
 
 // This was taken from VueJS 2.* core. Thanks Vue!
-function parseFor (expression) {
+function parseFor(expression) {
     const forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/
     const stripParensRE = /^\(|\)$/g
     const forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/
 
     const inMatch = expression.match(forAliasRE)
-    if (! inMatch) return
+    if (!inMatch) return
     const res = {}
     res.bunch = inMatch[2].trim()
     const single = inMatch[1].trim().replace(stripParensRE, '')
@@ -108,7 +113,7 @@ function parseFor (expression) {
         res.single = single
     }
     return res
-  }
+}
 
 function getThisIterationsKeyFromTemplateTag(component, el, single, iterator1, iterator2, i, index, group) {
     const keyAttr = getXAttrs(el, 'bind').filter(attr => attr.value === 'key')[0]
